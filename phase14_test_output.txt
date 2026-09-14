@@ -1,0 +1,13 @@
+.........s.......F.....                                                  [100%]
+=================================== FAILURES ===================================
+___________ test_production_env_example_documents_required_controls ____________
+
+    def test_production_env_example_documents_required_controls():
+        env = Path('.env.example').read_text()
+>       assert 'GENESIS_JWT_SECRET' in env
+E       AssertionError: assert 'GENESIS_JWT_SECRET' in 'GENESIS_ALLOWED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000\n'
+
+tests/test_phase14_production_readiness.py:15: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_phase14_production_readiness.py::test_production_env_example_documents_required_controls - AssertionError: assert 'GENESIS_JWT_SECRET' in 'GENESIS_ALLOWED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000\n'
+1 failed, 21 passed, 1 skipped in 3.57s

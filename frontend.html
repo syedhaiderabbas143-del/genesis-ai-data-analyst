@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Genesis AI</title>
+
+    <style>
+        :root {
+            --bg: #f4f6f9;
+            --card: #ffffff;
+            --card2: #f8fafc;
+            --text: #1f2937;
+            --muted: #64748b;
+            --border: #dbe1e8;
+            --button: #1f2937;
+            --button-hover: #334155;
+            --primary: #16a34a;
+            --success-bg: #dcfce7;
+            --success-text: #166534;
+            --error-bg: #fee2e2;
+            --error-text: #991b1b;
+            --output-bg: #111827;
+            --output-text: #e5e7eb;
+        }
+
+        body.dark {
+            --bg: #111827;
+            --card: #182230;
+            --card2: #243041;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --border: #334155;
+            --button: #263548;
+            --button-hover: #334155;
+            --primary: #16a34a;
+            --success-bg: #052e16;
+            --success-text: #86efac;
+            --error-bg: #450a0a;
+            --error-text: #fca5a5;
+            --output-bg: #0b1120;
+            --output-text: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 25px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 18px;
+        }
+
+        .top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        button {
+            border: none;
+            border-radius: 9px;
+            padding: 13px 20px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            background: var(--button);
+            color: white;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: var(--button-hover);
+            transform: translateY(-1px);
+        }
+
+        button.active {
+            background: var(--primary);
+            box-shadow: 0 0 15px rgba(22, 163, 74, 0.35);
+        }
+
+        .mode-btn {
+            margin-left: auto;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1450px;
+            margin: 30px auto;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 22px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+        }
+
+        .card h3 {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .message {
+            display: none;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            font-weight: bold;
+        }
+
+        .message.success {
+            display: block;
+            background: var(--success-bg);
+            color: var(--success-text);
+            border: 1px solid var(--success-text);
+        }
+
+        .message.error {
+            display: block;
+            background: var(--error-bg);
+            color: var(--error-text);
+            border: 1px solid var(--error-text);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+
+        .stat-box {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .stat-title {
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            font-size: 15px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            min-width: 190px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .file-input {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .output {
+            background: var(--output-bg);
+            color: var(--output-text);
+            padding: 20px;
+            border-radius: 12px;
+            min-height: 100px;
+            max-height: 650px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: Consolas, monospace;
+            margin-top: 15px;
+        }
+
+        .download-link {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 14px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: var(--card2);
+            position: sticky;
+            top: 0;
+        }
+
+        .ask-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        .ask-box input {
+            flex: 1;
+        }
+
+        .small-note {
+            color: var(--muted);
+            margin-top: 10px;
+        }
+
+        @media(max-width: 700px) {
+
+            .container {
+                width: 95%;
+            }
+
+            .header h1 {
+                font-size: 25px;
+            }
+
+            .mode-btn {
+                margin-left: 0;
+            }
+
+            .ask-box {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+
+        <h1>🚀 Genesis AI</h1>
+
+        <div class="subtitle">
+            Data Analyst + Data Engineer Intelligence Platform
+        </div>
+
+        <div class="top-bar">
+
+            <button id="askTab" class="tab-button active" onclick="openSection('ask')">
+                🤖 Ask AI
+            </button>
+
+            <button id="analyticsTab" class="tab-button" onclick="openSection('analytics')">
+                📊 Analytics
+            </button>
+
+            <button id="engineerTab" class="tab-button" onclick="openSection('engineer')">
+                🏗️ Data Engineer
+            </button>
+
+            <button id="previewTab" class="tab-button" onclick="openSection('preview')">
+                👁 Preview
+            </button>
+
+            <button class="mode-btn" id="themeButton" onclick="toggleTheme()">
+                🌙 Dark Mode
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="container">
+
+        <div id="globalMessage" class="message"></div>
+
+
+        <!-- ========================= -->
+        <!-- ASK AI SECTION -->
+        <!-- ========================= -->
+
+        <div id="ask" class="section active">
+
+            <div class="card">
+
+                <h2>📁 Upload Dataset</h2>
+
+                <input type="file" id="fileInput" class="file-input" accept=".csv,.xlsx,.xls">
+
+                <button onclick="uploadDataset()">
+                    Upload Dataset
+                </button>
+
+                <div id="uploadMessage"></div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="stats">
+
+                    <div class="stat-box">
+                        <div class="stat-title">Rows</div>
+                        <div class="stat-value" id="rowsCount">-</div>
+                    </div>
+
+                    <div class="stat-box">
+                        <div class="stat-title">Columns</div>
+                        <div class="stat-value" id="columnsCount">-</div>
+                    </div>
+
+                    <div class="stat-box">
+                        <div class="stat-title">Quality Score</div>
+                        <div class="stat-value" id="qualityScore">-</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h2>🤖 Ask AI</h2>
+
+                <div class="ask-box">
+
+                    <input type="text" id="questionInput" placeholder="Ask anything about your dataset...">
+
+                    <button onclick="askAI()">
+                        Ask
+                    </button>
+
+                </div>
+
+                <div id="askOutput" class="output">
+                    Ask a question about your uploaded dataset.
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ========================= -->
+        <!-- ANALYTICS SECTION -->
+        <!-- ========================= -->
+        <div id="analytics" class="section">
+            <div class="card">
+                <h2>📊 Analytics Dashboard</h2>
+                <div class="form-row">
+                    <input type="text" id="analyticsMetric1" placeholder="Metric 1 e.g. Salary">
+                    <input type="text" id="analyticsMetric2" placeholder="Metric 2 e.g. Bonus">
+                    <input type="text" id="analyticsGroup" placeholder="Group e.g. Department">
+                </div>
+                <div class="button-row">
+                    <button onclick="analyticsInsights()">🤖 AI Insights</button>
+                    <button onclick="analyticsStatistics()">📈 Statistics</button>
+                    <button onclick="analyticsOutliers()">⚠️ Outliers</button>
+                    <button onclick="analyticsCorrelation()">🔗 Correlation</button>
+                    <button onclick="analyticsMatrix()">🧮 Correlation Matrix</button>
+                    <button onclick="analyticsForecast()">🔮 Forecast</button>
+                    <button onclick="analyticsTrend()">📉 Trend Analysis</button>
+                    <button onclick="analyticsSummary()">📊 Group Summary</button>
+                    <button onclick="analyticsColumns()">🗂️ Dataset Columns</button>
+                </div>
+                <div class="small-note">
+                    Metric examples: Salary, Revenue, Profit. Group examples: Department, City, Gender.
+                </div>
+                <div id="analyticsOutput" class="output">Select an analytics feature.</div>
+            </div>
+        </div>
+
+        <!-- ========================= -->
+        <!-- PREVIEW SECTION -->
+        <!-- ========================= -->
+
+        <div id="preview" class="section">
+
+            <div class="card">
+
+                <h2>👁 Dataset Preview</h2>
+
+                <button onclick="loadPreview()">
+                    🔄 Refresh Preview
+                </button>
+
+                <div class="small-note">
+                    Dataset upload karne ke baad preview yahan dikhega.
+                </div>
+
+                <div id="previewOutput" class="output">
+                    Click Refresh Preview.
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ========================= -->
+        <!-- DATA ENGINEER -->
+        <!-- ========================= -->
+
+        <div id="engineer" class="section">
+
+            <div class="card">
+
+                <h2>🏗️ Data Engineer</h2>
+
+                <h3>Core Data Engineering</h3>
+
+                <div class="button-row">
+
+                    <button onclick="engineerRequest('schema')">
+                        Schema Detection
+                    </button>
+
+                    <button onclick="engineerRequest('pipeline','POST')">
+                        Run ETL Pipeline
+                    </button>
+
+                    <button onclick="engineerRequest('lineage')">
+                        Data Lineage
+                    </button>
+
+                    <button onclick="engineerRequest('privacy')">
+                        Privacy / PII
+                    </button>
+
+                    <button onclick="engineerRequest('quality')">
+                        Data Quality
+                    </button>
+
+                    <button onclick="engineerRequest('clean','POST')">
+                        Clean Data
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- TRANSFORMATION RULES -->
+
+            <div class="card">
+
+                <h2>⚙️ Transformation Rules</h2>
+
+
+                <h3>Rename Column</h3>
+
+                <div class="form-row">
+
+                    <input type="text" id="renameOld" placeholder="Old column name">
+
+                    <input type="text" id="renameNew" placeholder="New column name">
+
+                    <button onclick="renameColumn()">
+                        Rename Column
+                    </button>
+
+                </div>
+
+
+                <h3>Drop Column</h3>
+
+                <div class="form-row">
+
+                    <input type="text" id="dropColumnName" placeholder="Column to drop">
+
+                    <button onclick="dropColumn()">
+                        Drop Column
+                    </button>
+
+                </div>
+
+
+                <h3>Change Data Type</h3>
+
+                <div class="form-row">
+
+                    <input type="text" id="dtypeColumn" placeholder="Column name">
+
+                    <select id="dtypeType">
+
+                        <option value="int">Integer</option>
+                        <option value="float">Float</option>
+                        <option value="string">String</option>
+                        <option value="datetime">Datetime</option>
+
+                    </select>
+
+                    <button onclick="changeDataType()">
+                        Change Data Type
+                    </button>
+
+                </div>
+
+
+                <h3>Fill Missing Values</h3>
+
+                <div class="form-row">
+
+                    <input type="text" id="fillColumn" placeholder="Column name">
+
+                    <input type="text" id="fillValue" placeholder="Missing value replacement">
+
+                    <button onclick="fillMissing()">
+                        Fill Missing
+                    </button>
+
+                </div>
+
+
+                <h3>Remove Duplicates</h3>
+
+                <div class="form-row">
+
+                    <button onclick="removeDuplicates()">
+                        Remove Duplicates
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- FILTERING -->
+
+            <div class="card">
+
+                <h2>🔍 Row Filtering</h2>
+
+                <div class="form-row">
+
+                    <input type="text" id="filterColumn" placeholder="Column">
+
+                    <select id="filterOperator">
+
+                        <option value="equals">Equals</option>
+                        <option value="not_equals">Not Equals</option>
+                        <option value="greater_than">Greater Than</option>
+                        <option value="less_than">Less Than</option>
+                        <option value="greater_equal">Greater or Equal</option>
+                        <option value="less_equal">Less or Equal</option>
+
+                    </select>
+
+                    <input type="text" id="filterValue" placeholder="Value">
+
+                    <button onclick="filterRows()">
+                        Filter Rows
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PIPELINE -->
+
+            <div class="card">
+
+                <h2>📜 Pipeline Management</h2>
+
+                <div class="button-row">
+
+                    <button onclick="engineerRequest('history')">
+                        Pipeline History
+                    </button>
+
+                    <button onclick="engineerRequest('versions')">
+                        Dataset Versions
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- EXPORT -->
+
+            <div class="card">
+
+                <h2>📤 Export Dataset</h2>
+
+                <div class="button-row">
+
+                    <button onclick="exportDataset('csv')">
+                        Export CSV
+                    </button>
+
+                    <button onclick="exportDataset('xlsx')">
+                        Export Excel
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div id="engineerOutput" class="output">
+                Click any Data Engineer feature to see the result here.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        const API = "http://127.0.0.1:8000";
+
+
+        /* ============================= */
+        /* SECTION NAVIGATION */
+        /* ============================= */
+
+        function openSection(sectionId) {
+
+            document.querySelectorAll(".section")
+                .forEach(section => {
+                    section.classList.remove("active");
+                });
+
+            document.querySelectorAll(".tab-button")
+                .forEach(button => {
+                    button.classList.remove("active");
+                });
+
+            document.getElementById(sectionId)
+                .classList.add("active");
+
+            const tabMap = {
+                ask: "askTab",
+                analytics: "analyticsTab",
+                engineer: "engineerTab",
+                preview: "previewTab"
+            };
+
+            document.getElementById(tabMap[sectionId])
+                .classList.add("active");
+
+            const names = {
+                ask: "Ask AI",
+                analytics: "Analytics",
+                engineer: "Data Engineer",
+                preview: "Dataset Preview"
+            };
+
+            showGlobalMessage(
+                "success",
+                "✅ " + names[sectionId] + " opened successfully."
+            );
+
+        }
+
+
+        /* ============================= */
+        /* LIGHT / DARK MODE */
+        /* ============================= */
+
+        function toggleTheme() {
+
+            document.body.classList.toggle("dark");
+
+            const button =
+                document.getElementById("themeButton");
+
+            if (document.body.classList.contains("dark")) {
+
+                button.innerHTML = "☀️ Light Mode";
+
+                localStorage.setItem(
+                    "genesisTheme",
+                    "dark"
+                );
+
+            } else {
+
+                button.innerHTML = "🌙 Dark Mode";
+
+                localStorage.setItem(
+                    "genesisTheme",
+                    "light"
+                );
+            }
+
+        }
+
+
+        function loadTheme() {
+
+            const savedTheme =
+                localStorage.getItem("genesisTheme");
+
+            if (savedTheme === "dark") {
+
+                document.body.classList.add("dark");
+
+                document.getElementById(
+                    "themeButton"
+                ).innerHTML = "☀️ Light Mode";
+
+            }
+
+        }
+
+
+        loadTheme();
+
+
+        /* ============================= */
+        /* GLOBAL MESSAGE */
+        /* ============================= */
+
+        function showGlobalMessage(type, message) {
+
+            const box =
+                document.getElementById("globalMessage");
+
+            box.className =
+                "message " + type;
+
+            box.innerHTML = message;
+
+            setTimeout(() => {
+
+                box.className = "message";
+                box.innerHTML = "";
+
+            }, 3500);
+
+        }
+
+
+        /* ============================= */
+        /* UPLOAD DATASET */
+        /* ============================= */
+
+        async function uploadDataset() {
+
+            const fileInput =
+                document.getElementById("fileInput");
+
+            const uploadBox =
+                document.getElementById("uploadMessage");
+
+            if (!fileInput.files.length) {
+
+                uploadBox.innerHTML =
+                    '<div class="message error">❌ Please select a dataset first.</div>';
+
+                return;
+            }
+
+            const formData = new FormData();
+
+            formData.append(
+                "file",
+                fileInput.files[0]
+            );
+
+            try {
+
+                const response =
+                    await fetch(API + "/upload", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                const data =
+                    await response.json();
+
+                window.latestUploadData = data;
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.detail ||
+                        "Upload failed"
+                    );
+
+                }
+
+                uploadBox.innerHTML =
+                    '<div class="message success">✅ Dataset uploaded successfully.</div>';
+
+                document.getElementById(
+                    "rowsCount"
+                ).innerText =
+                    data.rows ?? "-";
+
+                let columnCount = "-";
+
+                if (data.columns) {
+
+                    if (Array.isArray(data.columns)) {
+                        columnCount =
+                            data.columns.length;
+                    } else {
+                        columnCount =
+                            data.columns;
+                    }
+                }
+
+                document.getElementById(
+                    "columnsCount"
+                ).innerText =
+                    columnCount;
+
+                if (
+                    data.quality_score !== undefined
+                ) {
+
+                    document.getElementById(
+                        "qualityScore"
+                    ).innerText =
+                        data.quality_score;
+
+                }
+
+                showGlobalMessage(
+                    "success",
+                    "✅ Dataset uploaded successfully."
+                );
+
+            } catch (error) {
+
+                uploadBox.innerHTML =
+                    '<div class="message error">❌ ' +
+                    error.message +
+                    '</div>';
+
+            }
+
+        }
+
+
+        /* ============================= */
+        /* ASK AI */
+        /* ============================= */
+
+        async function askAI() {
+
+            const question =
+                document.getElementById(
+                    "questionInput"
+                ).value.trim();
+
+            const output =
+                document.getElementById(
+                    "askOutput"
+                );
+
+            if (!question) {
+
+                output.textContent =
+                    "Please enter a question.";
+
+                return;
+            }
+
+            output.textContent =
+                "⏳ Genesis AI is analyzing...";
+
+            try {
+
+                const response =
+                    await fetch(API + "/ask", {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify({
+                                question: question
+                            })
+
+                    });
+
+                const data =
+                    await response.json();
+
+                output.textContent =
+                    typeof data === "string"
+                        ? data
+                        : JSON.stringify(
+                            data,
+                            null,
+                            2
+                        );
+
+            } catch (error) {
+
+                output.textContent =
+                    "❌ ERROR: " +
+                    error.message;
+
+            }
+
+        }
+
+
+        /* ============================= */
+        /* ANALYTICS */
+        /* ============================= */
+        function metric(id) {
+            return document.getElementById(id).value.trim();
+        }
+
+        async function analyticsFetch(path, options = {}) {
+            const output = document.getElementById("analyticsOutput");
+            output.textContent = "⏳ Genesis AI is analyzing...";
+            try {
+                const response = await fetch(API + path, options);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || data.message || "Analytics request failed");
+                output.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                output.textContent = "❌ ERROR: " + error.message;
+            }
+        }
+
+        function analyticsInsights() { analyticsFetch("/insights"); }
+        function analyticsStatistics() {
+            const m = metric("analyticsMetric1");
+            analyticsFetch("/statistics" + (m ? "?column=" + encodeURIComponent(m) : ""));
+        }
+        function analyticsOutliers() {
+            const m = metric("analyticsMetric1");
+            if (!m) return document.getElementById("analyticsOutput").textContent = "⚠️ Enter Metric 1, e.g. Salary.";
+            analyticsFetch("/outliers?column=" + encodeURIComponent(m));
+        }
+        function analyticsCorrelation() {
+            const a = metric("analyticsMetric1"), b = metric("analyticsMetric2");
+            if (!a || !b) return document.getElementById("analyticsOutput").textContent = "⚠️ Enter Metric 1 and Metric 2.";
+            analyticsFetch("/correlation?column1=" + encodeURIComponent(a) + "&column2=" + encodeURIComponent(b));
+        }
+        function analyticsMatrix() { analyticsFetch("/correlation"); }
+        function analyticsForecast() {
+            const m = metric("analyticsMetric1");
+            if (!m) return document.getElementById("analyticsOutput").textContent = "⚠️ Enter Metric 1 for forecast.";
+            analyticsFetch("/forecast", {
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({target:m, periods:10})
+            });
+        }
+        function analyticsTrend() {
+            const m = metric("analyticsMetric1");
+            analyticsFetch("/trend" + (m ? "?column=" + encodeURIComponent(m) : ""));
+        }
+        function analyticsSummary() {
+            const m = metric("analyticsMetric1"), g = metric("analyticsGroup");
+            if (!m || !g) return document.getElementById("analyticsOutput").textContent = "⚠️ Enter Metric 1 and Group.";
+            document.getElementById("questionInput").value = "Give a detailed summary of " + m + " by " + g;
+            openSection("ask");
+            askAI();
+        }
+        function analyticsColumns() {
+            const d = window.latestUploadData;
+            document.getElementById("analyticsOutput").textContent =
+                d && d.columns ? JSON.stringify({columns:d.columns}, null, 2) : "⚠️ Upload a dataset first.";
+        }
+
+        /* ============================= */
+        /* DATASET PREVIEW */
+        /* ============================= */
+        async function loadPreview() {
+            const output = document.getElementById("previewOutput");
+            if (window.latestUploadData && Array.isArray(window.latestUploadData.preview)) {
+                return renderPreview(window.latestUploadData.preview);
+            }
+            output.textContent = "⏳ Loading dataset preview...";
+            try {
+                const response = await fetch(API + "/preview");
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || "Preview unavailable");
+                renderPreview(data.preview || data.data || data.rows || data);
+            } catch (error) {
+                output.textContent = "⚠️ Please upload the dataset again, then click Refresh Preview.";
+            }
+        }
+        function renderPreview(rows) {
+            const output = document.getElementById("previewOutput");
+            if (!Array.isArray(rows) || !rows.length || typeof rows[0] !== "object") {
+                output.textContent = JSON.stringify(rows, null, 2); return;
+            }
+            const cols = Object.keys(rows[0]);
+            let s = '<div class="table-wrapper"><table><thead><tr>';
+            cols.forEach(c => s += "<th>" + escapeHtml(c) + "</th>");
+            s += "</tr></thead><tbody>";
+            rows.forEach(r => {
+                s += "<tr>";
+                cols.forEach(c => s += "<td>" + escapeHtml(r[c]) + "</td>");
+                s += "</tr>";
+            });
+            output.innerHTML = s + "</tbody></table></div>";
+        }
+
+        /* ============================= */
+        /* DATA ENGINEER REQUEST */
+        /* ============================= */
+
+        async function engineerRequest(
+            endpoint,
+            method = "GET",
+            body = null
+        ) {
+
+            const output =
+                document.getElementById(
+                    "engineerOutput"
+                );
+
+            output.textContent =
+                "⏳ Processing...";
+
+            try {
+
+                const options = {
+                    method: method,
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    }
+                };
+
+                if (body !== null) {
+
+                    options.body =
+                        JSON.stringify(body);
+
+                }
+
+                const response =
+                    await fetch(
+                        API +
+                        "/engineer/" +
+                        endpoint,
+                        options
+                    );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.detail ||
+                        "Request failed"
+                    );
+
+                }
+
+                output.textContent =
+                    JSON.stringify(
+                        data,
+                        null,
+                        2
+                    );
+
+                if (
+                    data.quality_score !== undefined
+                ) {
+
+                    document.getElementById(
+                        "qualityScore"
+                    ).innerText =
+                        data.quality_score;
+
+                }
+
+            } catch (error) {
+
+                output.textContent =
+                    "❌ ERROR: " +
+                    error.message;
+
+            }
+
+        }
+
+
+        /* ============================= */
+        /* RENAME COLUMN */
+        /* ============================= */
+
+        function renameColumn() {
+
+            const oldName =
+                document.getElementById(
+                    "renameOld"
+                ).value.trim();
+
+            const newName =
+                document.getElementById(
+                    "renameNew"
+                ).value.trim();
+
+            if (!oldName || !newName) {
+
+                alert(
+                    "Please enter both column names."
+                );
+
+                return;
+            }
+
+            engineerRequest(
+                "transform/rename",
+                "POST",
+                {
+                    old_name: oldName,
+                    new_name: newName
+                }
+            );
+
+        }
+
+
+        /* ============================= */
+        /* DROP COLUMN */
+        /* ============================= */
+
+        function dropColumn() {
+
+            const column =
+                document.getElementById(
+                    "dropColumnName"
+                ).value.trim();
+
+            if (!column) {
+
+                alert(
+                    "Please enter a column name."
+                );
+
+                return;
+            }
+
+            engineerRequest(
+                "transform/drop",
+                "POST",
+                {
+                    column: column
+                }
+            );
+
+        }
+
+
+        /* ============================= */
+        /* CHANGE DATA TYPE */
+        /* ============================= */
+
+        function changeDataType() {
+
+            const column =
+                document.getElementById(
+                    "dtypeColumn"
+                ).value.trim();
+
+            const dtype =
+                document.getElementById(
+                    "dtypeType"
+                ).value;
+
+            if (!column) {
+
+                alert(
+                    "Please enter a column name."
+                );
+
+                return;
+            }
+
+            engineerRequest(
+                "transform/dtype",
+                "POST",
+                {
+                    column: column,
+                    dtype: dtype
+                }
+            );
+
+        }
+
+
+        /* ============================= */
+        /* FILL MISSING */
+        /* ============================= */
+
+        function fillMissing() {
+
+            const column =
+                document.getElementById(
+                    "fillColumn"
+                ).value.trim();
+
+            const value =
+                document.getElementById(
+                    "fillValue"
+                ).value;
+
+            if (!column) {
+
+                alert(
+                    "Please enter a column name."
+                );
+
+                return;
+            }
+
+            engineerRequest(
+                "transform/fill",
+                "POST",
+                {
+                    column: column,
+                    value: value
+                }
+            );
+
+        }
+
+
+        /* ============================= */
+        /* REMOVE DUPLICATES */
+        /* ============================= */
+
+        function removeDuplicates() {
+
+            engineerRequest(
+                "transform/remove-duplicates",
+                "POST"
+            );
+
+        }
+
+
+        /* ============================= */
+        /* FILTER ROWS */
+        /* ============================= */
+
+        function filterRows() {
+
+            const column =
+                document.getElementById(
+                    "filterColumn"
+                ).value.trim();
+
+            const operator =
+                document.getElementById(
+                    "filterOperator"
+                ).value;
+
+            const value =
+                document.getElementById(
+                    "filterValue"
+                ).value.trim();
+
+            if (!column || !value) {
+
+                alert(
+                    "Please enter column and value."
+                );
+
+                return;
+            }
+
+            engineerRequest(
+                "transform/filter",
+                "POST",
+                {
+                    column: column,
+                    operator: operator,
+                    value: value
+                }
+            );
+
+        }
+
+
+        /* ============================= */
+        /* EXPORT DATASET */
+        /* ============================= */
+
+        async function exportDataset(format) {
+
+            const output =
+                document.getElementById(
+                    "engineerOutput"
+                );
+
+            output.textContent =
+                "⏳ Preparing " +
+                format.toUpperCase() +
+                " export...";
+
+            try {
+
+                const response =
+                    await fetch(
+                        API + "/engineer/export",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    format: format
+                                })
+
+                        }
+                    );
+
+                if (!response.ok) {
+
+                    let errorText =
+                        await response.text();
+
+                    throw new Error(
+                        errorText
+                    );
+
+                }
+
+                const blob =
+                    await response.blob();
+
+                const url =
+                    URL.createObjectURL(blob);
+
+                const link =
+                    document.createElement("a");
+
+                link.href = url;
+
+                link.download =
+                    "genesis_export." +
+                    format;
+
+                document.body.appendChild(
+                    link
+                );
+
+                link.click();
+
+                link.remove();
+
+                URL.revokeObjectURL(
+                    url
+                );
+
+                output.textContent =
+                    "✅ " +
+                    format.toUpperCase() +
+                    " file downloaded successfully.";
+
+            } catch (error) {
+
+                output.textContent =
+                    "❌ ERROR: " +
+                    error.message;
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
