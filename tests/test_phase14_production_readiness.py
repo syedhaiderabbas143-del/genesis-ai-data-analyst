@@ -20,7 +20,24 @@ def test_production_env_example_documents_required_controls():
 def test_live_fastapi_application_imports_and_exposes_routes(monkeypatch):
     monkeypatch.setenv('GENESIS_JWT_SECRET', 'x' * 40)
     from main import app
-    paths = {route.path for route in app.routes}
+    def test_live_fastapi_application_imports_and_exposes_routes(monkeypatch):
+     monkeypatch.setenv('GENESIS_JWT_SECRET', 'x' * 40)
+
+    from main import app
+
+    paths = set(app.openapi().get("paths", {}).keys())
+
+    for path in [
+        '/auth/register',
+        '/auth/login',
+        '/v2/upload',
+        '/v2/datasets',
+        '/v2/datasets/{dataset_id}/dashboard',
+        '/v2/datasets/{dataset_id}/correlation',
+        '/v2/datasets/{dataset_id}/forecast',
+        '/v2/datasets/{dataset_id}/report'
+    ]:
+        assert path in paths
     for path in ['/auth/register', '/auth/login', '/v2/upload', '/v2/datasets', '/v2/datasets/{dataset_id}/dashboard', '/v2/datasets/{dataset_id}/correlation', '/v2/datasets/{dataset_id}/forecast', '/v2/datasets/{dataset_id}/report']:
         assert path in paths
 
