@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local database and generated storage
+genesis_security.sqlite3
+storage/
+*.sqlite3
+
