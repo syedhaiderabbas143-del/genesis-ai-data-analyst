@@ -20,7 +20,17 @@ def test_production_env_example_documents_required_controls():
 def test_live_fastapi_application_imports_and_exposes_routes(monkeypatch):
     monkeypatch.setenv('GENESIS_JWT_SECRET', 'x' * 40)
     from main import app
-    paths = {route.path for route in app.routes}
+    def collect_paths(routes):
+        paths = set()
+        for route in routes:
+            if hasattr(route, 'path'):
+                paths.add(route.path)
+            if hasattr(route, 'routes'):
+                paths.update(collect_paths(route.routes))
+            elif hasattr(route, 'original_router'):
+                paths.update(collect_paths(route.original_router.routes))
+        return paths
+    paths = collect_paths(app.routes)
     for path in ['/auth/register', '/auth/login', '/v2/upload', '/v2/datasets', '/v2/datasets/{dataset_id}/dashboard', '/v2/datasets/{dataset_id}/correlation', '/v2/datasets/{dataset_id}/forecast', '/v2/datasets/{dataset_id}/report']:
         assert path in paths
 
@@ -34,3 +44,6 @@ def test_legacy_decommission_switch_is_not_applied_to_v2():
 def test_production_report_and_deployment_docs_exist():
     assert Path('PHASE14_PRODUCTION_READINESS_REPORT.md').exists()
     assert Path('DEPLOYMENT_CHECKLIST.md').exists()
+
+
+
