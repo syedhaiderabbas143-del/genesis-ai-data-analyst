@@ -271,7 +271,7 @@ redo_history = []
 def serve_frontend():
 
     return FileResponse(
-        "Frontend.html"
+        "frontend.html"
     )
 
 
@@ -448,7 +448,7 @@ def home():
     }
 @app.get("/dashboard")
 def dashboard():
-    return FileResponse("Frontend.html")
+    return FileResponse("frontend.html")
 
 # ----------------------------
 # Upload API
