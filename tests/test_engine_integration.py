@@ -103,3 +103,25 @@ def test_orchestration_executes_canonical_root_cause_engine():
     assert root_cause["affected_percentage"] == 41.67
     assert root_cause["numeric_factors"]
 
+
+
+def test_orchestration_root_cause_skips_unsupported_low_performance_target():
+    df = pd.DataFrame({
+        "sales": [100, 120, 140, 160, 180, 200],
+        "profit": [20, 25, 30, 35, 40, 45],
+        "cost": [80, 95, 110, 125, 140, 155],
+        "city": ["A", "A", "B", "B", "C", "C"],
+    })
+
+    result = run_orchestration(df)
+
+    assert result["success"] is True
+    root_cause = result["execution_results"]["root_cause"]
+
+    assert root_cause["issue_type"] == "low_performance"
+    assert root_cause["root_cause_detected"] is False
+    assert root_cause["root_causes"] == []
+    assert root_cause["contributing_groups"] == []
+    assert root_cause["numeric_factors"] == []
+    assert root_cause["analysis_confidence"] == "Low"
+    assert root_cause["confidence_score"] == 0
