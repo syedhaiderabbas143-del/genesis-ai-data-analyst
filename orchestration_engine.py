@@ -35,7 +35,7 @@ class OrchestrationEngine:
         ).columns.tolist()
 
         categorical_columns = self.df.select_dtypes(
-            include=["object", "category", "bool"]
+            include=["object", "str", "category", "bool"]
         ).columns.tolist()
 
         missing_values = int(self.df.isnull().sum().sum())

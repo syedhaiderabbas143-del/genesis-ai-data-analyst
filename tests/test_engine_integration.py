@@ -125,3 +125,25 @@ def test_orchestration_root_cause_skips_unsupported_low_performance_target():
     assert root_cause["numeric_factors"] == []
     assert root_cause["analysis_confidence"] == "Low"
     assert root_cause["confidence_score"] == 0
+
+
+def test_orchestration_avoids_pandas4_string_dtype_warning():
+    import warnings
+
+    df = pd.DataFrame({
+        "sales": [100, 120, 140],
+        "cost": [80, 95, 110],
+        "city": ["A", "B", "C"],
+        "active": [True, False, True],
+    })
+
+    with warnings.catch_warnings(record=True) as captured:
+        warnings.simplefilter("always")
+        result = run_orchestration(df)
+
+    assert result["success"] is True
+    pandas4_warnings = [
+        warning for warning in captured
+        if warning.category.__name__ == "Pandas4Warning"
+    ]
+    assert pandas4_warnings == []
