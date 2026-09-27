@@ -69,32 +69,49 @@ class OrchestrationEngine:
         }
 
     def _execute_workflow(self, workflow: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Execute currently integrated canonical analytics engines."""
+        """Execute integrated analytics engines with per-engine failure isolation."""
 
         execution_results: Dict[str, Any] = {}
 
         for step in workflow:
-            if step["engine"] == "Correlation Analysis Engine":
-                correlation_engine = engine_registry.resolve_engine("correlation")
-                execution_results["correlation"] = correlation_engine(self.df)
+            engine_name = step["engine"]
 
-            if step["engine"] == "Root Cause Analysis Engine":
-                root_cause_engine = engine_registry.resolve_engine("root_cause")
-                target_column = (
-                    "profit"
-                    if "profit" in self.df.columns
-                    else self.df.select_dtypes(include="number").columns[0]
-                )
-                execution_results["root_cause"] = root_cause_engine(
-                    self.df,
-                    issue_type="low_performance",
-                    issue_title=f"{target_column.title()} root cause analysis",
-                    issue_message=f"Analyze potential drivers affecting {target_column}."
-                )
+            try:
+                if engine_name == "Correlation Analysis Engine":
+                    correlation_engine = engine_registry.resolve_engine("correlation")
+                    execution_results["correlation"] = correlation_engine(self.df)
 
-            if step["engine"] == "Segmentation Engine":
-                segmentation_engine = engine_registry.resolve_engine("segmentation")
-                execution_results["segmentation"] = segmentation_engine(self.df)
+                if engine_name == "Root Cause Analysis Engine":
+                    root_cause_engine = engine_registry.resolve_engine("root_cause")
+                    target_column = (
+                        "profit"
+                        if "profit" in self.df.columns
+                        else self.df.select_dtypes(include="number").columns[0]
+                    )
+                    execution_results["root_cause"] = root_cause_engine(
+                        self.df,
+                        issue_type="low_performance",
+                        issue_title=f"{target_column.title()} root cause analysis",
+                        issue_message=f"Analyze potential drivers affecting {target_column}."
+                    )
+
+                if engine_name == "Segmentation Engine":
+                    segmentation_engine = engine_registry.resolve_engine("segmentation")
+                    execution_results["segmentation"] = segmentation_engine(self.df)
+
+            except Exception as exc:
+                result_key = {
+                    "Correlation Analysis Engine": "correlation",
+                    "Root Cause Analysis Engine": "root_cause",
+                    "Segmentation Engine": "segmentation",
+                }.get(engine_name)
+
+                if result_key:
+                    execution_results[result_key] = {
+                        "success": False,
+                        "error": str(exc),
+                        "engine": engine_name,
+                    }
 
         return execution_results
 

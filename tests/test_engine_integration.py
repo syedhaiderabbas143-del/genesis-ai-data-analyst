@@ -147,3 +147,35 @@ def test_orchestration_avoids_pandas4_string_dtype_warning():
         if warning.category.__name__ == "Pandas4Warning"
     ]
     assert pandas4_warnings == []
+
+def test_orchestration_isolates_engine_failure_and_continues():
+    df = pd.DataFrame({
+        "sales": [100, 120, 140, 160, 180, 200],
+        "cost": [80, 95, 110, 125, 140, 155],
+        "city": ["A", "A", "B", "B", "C", "C"],
+    })
+
+    def failing_correlation_engine(_df):
+        raise RuntimeError("simulated correlation failure")
+
+    with patch(
+        "services.engine_registry.resolve_engine"
+    ) as mocked_resolve:
+        real_resolve = resolve_engine
+
+        def resolve_with_failure(engine_name):
+            if engine_name == "correlation":
+                return failing_correlation_engine
+            return real_resolve(engine_name)
+
+        mocked_resolve.side_effect = resolve_with_failure
+
+        result = run_orchestration(df)
+
+    assert result["success"] is True
+    assert "correlation" in result["execution_results"]
+    assert result["execution_results"]["correlation"]["success"] is False
+    assert "error" in result["execution_results"]["correlation"]
+
+    assert "root_cause" in result["execution_results"]
+    assert "segmentation" in result["execution_results"]
