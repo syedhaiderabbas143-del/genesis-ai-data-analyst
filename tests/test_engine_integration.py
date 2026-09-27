@@ -83,10 +83,10 @@ def test_engine_registry_resolves_canonical_segmentation_engine():
 
 def test_orchestration_executes_canonical_root_cause_engine():
     df = pd.DataFrame({
-        "sales": [100, 120, 140, 160, 180, 200],
-        "profit": [20, 25, 30, 35, 40, 45],
-        "cost": [80, 95, 110, 125, 140, 155],
-        "city": ["A", "A", "B", "B", "C", "C"],
+        "sales": [100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320],
+        "performance_rating": [1, 2, 1, 2, 1, 3, 4, 3, 4, 5, 3, 4],
+        "cost": [80, 95, 110, 125, 140, 155, 170, 185, 200, 215, 230, 245],
+        "city": ["A", "A", "B", "B", "C", "C", "A", "B", "C", "A", "B", "C"],
     })
 
     result = run_orchestration(df)
@@ -94,8 +94,12 @@ def test_orchestration_executes_canonical_root_cause_engine():
     assert result["success"] is True
     assert "execution_results" in result
     assert "root_cause" in result["execution_results"]
-    assert result["execution_results"]["root_cause"]["issue_type"] == "root_cause_analysis"
-    assert result["execution_results"]["root_cause"]["issue_title"] == "Profit root cause analysis"
 
+    root_cause = result["execution_results"]["root_cause"]
 
+    assert root_cause["issue_type"] == "low_performance"
+    assert root_cause["root_cause_detected"] is True
+    assert root_cause["affected_records"] == 5
+    assert root_cause["affected_percentage"] == 41.67
+    assert root_cause["numeric_factors"]
 
