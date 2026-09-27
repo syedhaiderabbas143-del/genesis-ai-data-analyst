@@ -33,6 +33,11 @@ ENGINE_SPECS = {
         "services.advanced_engine_facade",
         "root_cause_with_engine",
     ),
+    "segmentation": EngineSpec(
+        "segmentation",
+        "services.advanced_engine_facade",
+        "segmentation_with_engine",
+    ),
 }
 
 
@@ -50,3 +55,5 @@ def resolve_engine(name: str) -> Callable[..., Any]:
         raise RuntimeError(f"Configured engine is unavailable: {name}")
 
     return fn
+
+
