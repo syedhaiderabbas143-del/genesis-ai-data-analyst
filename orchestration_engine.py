@@ -78,6 +78,20 @@ class OrchestrationEngine:
                 correlation_engine = engine_registry.resolve_engine("correlation")
                 execution_results["correlation"] = correlation_engine(self.df)
 
+            if step["engine"] == "Root Cause Analysis Engine":
+                root_cause_engine = engine_registry.resolve_engine("root_cause")
+                target_column = (
+                    "profit"
+                    if "profit" in self.df.columns
+                    else self.df.select_dtypes(include="number").columns[0]
+                )
+                execution_results["root_cause"] = root_cause_engine(
+                    self.df,
+                    issue_type="root_cause_analysis",
+                    issue_title=f"{target_column.title()} root cause analysis",
+                    issue_message=f"Analyze potential drivers affecting {target_column}."
+                )
+
             if step["engine"] == "Segmentation Engine":
                 segmentation_engine = engine_registry.resolve_engine("segmentation")
                 execution_results["segmentation"] = segmentation_engine(self.df)
@@ -186,4 +200,5 @@ def run_orchestration(df: pd.DataFrame) -> Dict[str, Any]:
     engine = OrchestrationEngine(df)
 
     return engine.analyze_dataset()
+
 
