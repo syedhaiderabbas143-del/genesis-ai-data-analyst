@@ -1,6 +1,8 @@
 import pandas as pd
 from typing import Dict, Any, List
 
+from services import engine_registry
+
 
 class OrchestrationEngine:
     """
@@ -47,6 +49,8 @@ class OrchestrationEngine:
             duplicate_rows=duplicate_rows
         )
 
+        execution_results = self._execute_workflow(workflow)
+
         return {
             "success": True,
             "analysis_type": "Genesis AI Intelligent Orchestration",
@@ -60,8 +64,25 @@ class OrchestrationEngine:
             },
             "recommended_workflow": workflow,
             "total_recommended_steps": len(workflow),
+            "execution_results": execution_results,
             "message": "Intelligent analytics workflow generated successfully."
         }
+
+    def _execute_workflow(self, workflow: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Execute currently integrated canonical analytics engines."""
+
+        execution_results: Dict[str, Any] = {}
+
+        for step in workflow:
+            if step["engine"] == "Correlation Analysis Engine":
+                correlation_engine = engine_registry.resolve_engine("correlation")
+                execution_results["correlation"] = correlation_engine(self.df)
+
+            if step["engine"] == "Segmentation Engine":
+                segmentation_engine = engine_registry.resolve_engine("segmentation")
+                execution_results["segmentation"] = segmentation_engine(self.df)
+
+        return execution_results
 
     def _build_workflow(
         self,
@@ -165,3 +186,4 @@ def run_orchestration(df: pd.DataFrame) -> Dict[str, Any]:
     engine = OrchestrationEngine(df)
 
     return engine.analyze_dataset()
+

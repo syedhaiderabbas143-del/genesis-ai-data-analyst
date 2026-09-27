@@ -40,3 +40,11 @@ def forecast_with_engine(df: pd.DataFrame, **kwargs: Any) -> Any:
 
 def root_cause_with_engine(df: pd.DataFrame, **kwargs: Any) -> Any:
     return analyze_advanced_root_cause(df, **kwargs) if analyze_advanced_root_cause else {"status": "root_cause_engine_unavailable"}
+
+try:
+    from segmentation_engine import run_segmentation_analysis
+except ImportError:
+    run_segmentation_analysis = None
+
+def segmentation_with_engine(df: pd.DataFrame, **kwargs: Any) -> Any:
+    return run_segmentation_analysis(df, **kwargs) if run_segmentation_analysis else {"status": "segmentation_engine_unavailable"}
