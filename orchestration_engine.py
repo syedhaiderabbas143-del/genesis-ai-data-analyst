@@ -87,7 +87,7 @@ class OrchestrationEngine:
                 )
                 execution_results["root_cause"] = root_cause_engine(
                     self.df,
-                    issue_type="root_cause_analysis",
+                    issue_type="low_performance",
                     issue_title=f"{target_column.title()} root cause analysis",
                     issue_message=f"Analyze potential drivers affecting {target_column}."
                 )
