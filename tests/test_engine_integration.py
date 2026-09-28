@@ -208,3 +208,38 @@ def test_orchestration_reports_partial_execution_status():
     assert result["execution_status"]["overall_status"] == "partial_success"
     assert result["execution_status"]["successful_engines"] == 2
     assert result["execution_status"]["failed_engines"] == 1
+
+
+def test_orchestration_reports_success_when_all_executed_engines_succeed():
+    df = pd.DataFrame({
+        "sales": [100, 120, 140, 160, 180, 200],
+        "cost": [80, 95, 110, 125, 140, 155],
+        "city": ["A", "A", "B", "B", "C", "C"],
+    })
+
+    result = run_orchestration(df)
+
+    assert result["success"] is True
+    assert result["execution_status"]["overall_status"] == "success"
+    assert result["execution_status"]["failed_engines"] == 0
+    assert result["execution_status"]["successful_engines"] == 3
+
+
+def test_orchestration_reports_failed_when_all_executed_engines_fail():
+    df = pd.DataFrame({
+        "sales": [100, 120, 140, 160, 180, 200],
+        "cost": [80, 95, 110, 125, 140, 155],
+        "city": ["A", "A", "B", "B", "C", "C"],
+    })
+
+    def failing_engine(_df):
+        raise RuntimeError("simulated engine failure")
+
+    with patch("services.engine_registry.resolve_engine") as mocked_resolve:
+        mocked_resolve.return_value = failing_engine
+        result = run_orchestration(df)
+
+    assert result["success"] is True
+    assert result["execution_status"]["overall_status"] == "failed"
+    assert result["execution_status"]["successful_engines"] == 0
+    assert result["execution_status"]["failed_engines"] == 3
