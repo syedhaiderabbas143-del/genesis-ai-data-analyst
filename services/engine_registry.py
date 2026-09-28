@@ -23,6 +23,11 @@ ENGINE_SPECS = {
         "services.advanced_engine_facade",
         "forecast_with_engine",
     ),
+    "data_quality": EngineSpec(
+        "data_quality",
+        "services.advanced_engine_facade",
+        "data_quality_with_engine",
+    ),
     "correlation": EngineSpec(
         "correlation",
         "services.advanced_engine_facade",
