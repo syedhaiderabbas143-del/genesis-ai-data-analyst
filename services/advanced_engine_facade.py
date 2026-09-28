@@ -12,6 +12,11 @@ try:
 except ImportError:
     calculate_correlation = None
 try:
+    from quality_agent import run_quality_agent
+except ImportError:
+    run_quality_agent = None
+
+try:
     from advanced_root_cause_engine import analyze_advanced_root_cause
 except ImportError:
     analyze_advanced_root_cause = None
@@ -27,6 +32,13 @@ def dashboard_with_engine(df: pd.DataFrame) -> dict[str, Any]:
     for col in df.select_dtypes(include="number").columns[:10]:
         result["charts"][col] = {"min": float(df[col].min()), "max": float(df[col].max()), "mean": float(df[col].mean())}
     return result
+
+
+
+def data_quality_with_engine(df: pd.DataFrame) -> Any:
+    if run_quality_agent is None:
+        return {"success": False, "status": "data_quality_engine_unavailable"}
+    return run_quality_agent(df)
 
 
 def correlation_with_engine(df: pd.DataFrame) -> Any:

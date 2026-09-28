@@ -206,7 +206,7 @@ def test_orchestration_reports_partial_execution_status():
 
     assert result["success"] is True
     assert result["execution_status"]["overall_status"] == "partial_success"
-    assert result["execution_status"]["successful_engines"] == 2
+    assert result["execution_status"]["successful_engines"] == 3
     assert result["execution_status"]["failed_engines"] == 1
 
 
@@ -222,7 +222,7 @@ def test_orchestration_reports_success_when_all_executed_engines_succeed():
     assert result["success"] is True
     assert result["execution_status"]["overall_status"] == "success"
     assert result["execution_status"]["failed_engines"] == 0
-    assert result["execution_status"]["successful_engines"] == 3
+    assert result["execution_status"]["successful_engines"] == 4
 
 
 def test_orchestration_reports_failed_when_all_executed_engines_fail():
@@ -242,7 +242,7 @@ def test_orchestration_reports_failed_when_all_executed_engines_fail():
     assert result["success"] is True
     assert result["execution_status"]["overall_status"] == "failed"
     assert result["execution_status"]["successful_engines"] == 0
-    assert result["execution_status"]["failed_engines"] == 3
+    assert result["execution_status"]["failed_engines"] == 4
 
 
 def test_orchestration_reports_execution_coverage_against_recommended_workflow():
@@ -257,5 +257,19 @@ def test_orchestration_reports_execution_coverage_against_recommended_workflow()
     execution_status = result["execution_status"]
 
     assert execution_status["recommended_steps"] == result["total_recommended_steps"]
-    assert execution_status["executed_engines"] == 3
-    assert execution_status["unexecuted_steps"] == 5
+    assert execution_status["executed_engines"] == 4
+    assert execution_status["unexecuted_steps"] == 4
+
+def test_orchestration_executes_canonical_data_quality_engine():
+    df = pd.DataFrame({
+        "sales": [100, 120, 140, 160, 180, 200],
+        "cost": [80, 95, 110, 125, 140, 155],
+        "city": ["A", "A", "B", "B", "C", "C"],
+    })
+
+    result = run_orchestration(df)
+
+    assert result["execution_status"]["overall_status"] == "success"
+    assert "data_quality" in result["execution_results"]
+    assert result["execution_results"]["data_quality"]["success"] is True
+    assert result["execution_results"]["data_quality"]["analysis_type"] == "Genesis AI Quality Agent"

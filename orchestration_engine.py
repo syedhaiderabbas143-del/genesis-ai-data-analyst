@@ -111,6 +111,10 @@ class OrchestrationEngine:
             engine_name = step["engine"]
 
             try:
+                if engine_name == "Data Quality Engine":
+                    data_quality_engine = engine_registry.resolve_engine("data_quality")
+                    execution_results["data_quality"] = data_quality_engine(self.df)
+
                 if engine_name == "Correlation Analysis Engine":
                     correlation_engine = engine_registry.resolve_engine("correlation")
                     execution_results["correlation"] = correlation_engine(self.df)
@@ -135,6 +139,7 @@ class OrchestrationEngine:
 
             except Exception as exc:
                 result_key = {
+                    "Data Quality Engine": "data_quality",
                     "Correlation Analysis Engine": "correlation",
                     "Root Cause Analysis Engine": "root_cause",
                     "Segmentation Engine": "segmentation",
