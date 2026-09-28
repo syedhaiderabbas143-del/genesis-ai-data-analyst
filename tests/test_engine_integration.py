@@ -243,3 +243,19 @@ def test_orchestration_reports_failed_when_all_executed_engines_fail():
     assert result["execution_status"]["overall_status"] == "failed"
     assert result["execution_status"]["successful_engines"] == 0
     assert result["execution_status"]["failed_engines"] == 3
+
+
+def test_orchestration_reports_execution_coverage_against_recommended_workflow():
+    df = pd.DataFrame({
+        "sales": [100, 120, 140, 160, 180, 200],
+        "cost": [80, 95, 110, 125, 140, 155],
+        "city": ["A", "A", "B", "B", "C", "C"],
+    })
+
+    result = run_orchestration(df)
+
+    execution_status = result["execution_status"]
+
+    assert execution_status["recommended_steps"] == result["total_recommended_steps"]
+    assert execution_status["executed_engines"] == 3
+    assert execution_status["unexecuted_steps"] == 5

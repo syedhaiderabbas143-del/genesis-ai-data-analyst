@@ -79,6 +79,9 @@ class OrchestrationEngine:
             "successful_engines": len(successful_engines),
             "failed_engines": len(failed_engines),
             "total_executed_engines": len(executed_results),
+            "recommended_steps": len(workflow),
+            "executed_engines": len(executed_results),
+            "unexecuted_steps": len(workflow) - len(execution_results),
         }
 
         return {
