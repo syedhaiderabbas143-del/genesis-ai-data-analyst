@@ -51,6 +51,36 @@ class OrchestrationEngine:
 
         execution_results = self._execute_workflow(workflow)
 
+        executed_results = [
+            result
+            for result in execution_results.values()
+            if isinstance(result, dict)
+        ]
+        failed_engines = [
+            result
+            for result in executed_results
+            if result.get("success") is False
+        ]
+        successful_engines = [
+            result
+            for result in executed_results
+            if result.get("success") is not False
+        ]
+
+        if failed_engines and successful_engines:
+            overall_status = "partial_success"
+        elif failed_engines:
+            overall_status = "failed"
+        else:
+            overall_status = "success"
+
+        execution_status = {
+            "overall_status": overall_status,
+            "successful_engines": len(successful_engines),
+            "failed_engines": len(failed_engines),
+            "total_executed_engines": len(executed_results),
+        }
+
         return {
             "success": True,
             "analysis_type": "Genesis AI Intelligent Orchestration",
@@ -65,6 +95,7 @@ class OrchestrationEngine:
             "recommended_workflow": workflow,
             "total_recommended_steps": len(workflow),
             "execution_results": execution_results,
+            "execution_status": execution_status,
             "message": "Intelligent analytics workflow generated successfully."
         }
 
